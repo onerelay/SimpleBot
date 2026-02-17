@@ -8,7 +8,7 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
 (async () => {
   try {
     // ==================== SOCKS5 PROXY CONFIGURATION ====================
-    const SOCKS_URL = process.env.PROXY_URL; // e.g., socks5://user:pass@ip:port
+    const SOCKS_URL = process.env.PROXY_URL;
     console.log('🔍 PROXY_URL from env:', SOCKS_URL ? 'set' : 'not set');
 
     if (!SOCKS_URL) {
@@ -22,28 +22,25 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
         proxy: {
           host: socksUrl.hostname,
           port: parseInt(socksUrl.port) || 1080,
-          type: 5, // SOCKS5
+          type: 5,
           userId: socksUrl.username ? decodeURIComponent(socksUrl.username) : undefined,
           password: socksUrl.password ? decodeURIComponent(socksUrl.password) : undefined,
         },
         command: 'connect',
-        destination: { host: '', port: 0 }, // Will be set per request
+        destination: { host: '', port: 0 },
       };
 
       // Create a local HTTP proxy server
-      const localProxyPort = 0; // Let OS assign random port
+      const localProxyPort = 0;
       const localProxyServer = createServer((req, res) => {
-        // We only support CONNECT (HTTPS/WebSocket tunneling)
         res.writeHead(502);
-        res.end('This proxy only supports CONNECT (HTTPS/WebSocket)');
+        res.end('This proxy only supports CONNECT');
       });
 
-      // Handle CONNECT method
       localProxyServer.on('connect', async (req, clientSocket, head) => {
         const { port, hostname } = new URL(`http://${req.url}`);
         console.log(`🔌 CONNECT request to ${hostname}:${port}`);
 
-        // Timeout for SOCKS connection
         const timeout = setTimeout(() => {
           console.error(`❌ SOCKS connection to ${hostname}:${port} timed out`);
           clientSocket.write('HTTP/1.1 504 Gateway Timeout\r\n\r\n');
@@ -60,8 +57,6 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
           console.log(`✅ SOCKS connection established to ${hostname}:${port}`);
 
           clientSocket.write('HTTP/1.1 200 Connection Established\r\n\r\n');
-
-          // Pipe data
           socket.pipe(clientSocket);
           clientSocket.pipe(socket);
 
@@ -74,9 +69,7 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
             socket.end();
           });
 
-          if (head && head.length > 0) {
-            socket.write(head);
-          }
+          if (head && head.length > 0) socket.write(head);
         } catch (err) {
           clearTimeout(timeout);
           console.error(`❌ Failed to establish SOCKS connection to ${hostname}:${port}: ${err.message}`);
@@ -106,32 +99,51 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
       console.log('✅ WebSocket proxy agent configured to use local HTTP proxy');
     }
 
-    // ==================== TEST PROXY VIA IPIFY ====================
-    try {
-      console.log('🧪 Testing proxy via ipify (through undici)...');
-      const response = await fetch('https://api.ipify.org?format=json');
-      const data = await response.json();
-      console.log('✅ Public IP via proxy:', data.ip);
-    } catch (err) {
-      console.error('❌ Proxy test failed:', err.message);
+    // ==================== START EXPRESS SERVER FIRST (CRITICAL FOR RENDER) ====================
+    const app = express();
+    const PORT = process.env.PORT || 10000;
+
+    // Health check endpoint
+    app.get('/', (req, res) => res.send('Bot is running'));
+    // Add a status endpoint
+    app.get('/status', (req, res) => res.json({ status: 'ok', proxy: !!SOCKS_URL }));
+
+    const server = app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🌍 HTTP server listening on port ${PORT} at 0.0.0.0`);
+    });
+
+    // ==================== RUN PROXY TEST NON-BLOCKING ====================
+    if (SOCKS_URL) {
+      (async () => {
+        try {
+          console.log('🧪 Testing proxy via ipify (through undici)...');
+          const response = await fetch('https://api.ipify.org?format=json');
+          const data = await response.json();
+          console.log('✅ Public IP via proxy:', data.ip);
+        } catch (err) {
+          console.error('❌ Proxy test failed (non-critical):', err.message);
+        }
+      })();
     }
 
     // ==================== DISCORD API TEST ====================
-    try {
-      console.log('🌐 Testing connection to Discord API...');
-      const res = await fetch('https://discord.com/api/v10/gateway');
-      console.log('📡 Discord API status:', res.status, res.statusText);
-      const text = await res.text();
-      console.log('📄 Discord API response preview:', text.substring(0, 200));
+    (async () => {
       try {
-        const data = JSON.parse(text);
-        console.log('✅ Gateway URL:', data.url);
-      } catch {
-        console.error('❌ Discord API response is not JSON.');
+        console.log('🌐 Testing connection to Discord API...');
+        const res = await fetch('https://discord.com/api/v10/gateway');
+        console.log('📡 Discord API status:', res.status, res.statusText);
+        const text = await res.text();
+        console.log('📄 Discord API response preview:', text.substring(0, 200));
+        try {
+          const data = JSON.parse(text);
+          console.log('✅ Gateway URL:', data.url);
+        } catch {
+          console.error('❌ Discord API response is not JSON.');
+        }
+      } catch (err) {
+        console.error('❌ Discord API network error:', err.message);
       }
-    } catch (err) {
-      console.error('❌ Discord API network error:', err.message);
-    }
+    })();
 
     // ==================== TOKEN VALIDATION ====================
     const token = process.env.TOKEN;
@@ -171,16 +183,6 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
     await client.login(token);
     clearTimeout(loginTimeout);
     console.log('✅ Login successful!');
-
-    // ==================== EXPRESS SERVER ====================
-    const app = express();
-    const PORT = process.env.PORT || 10000;
-
-    app.get('/', (req, res) => res.send('Bot is running'));
-
-    app.listen(PORT, () => {
-      console.log(`🌍 HTTP server listening on port ${PORT}`);
-    });
 
   } catch (err) {
     console.error('❌ Fatal error on startup:', err.message);
