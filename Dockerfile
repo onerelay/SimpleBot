@@ -28,7 +28,7 @@ RUN chmod +x /start_services.sh
 # Copy and set up your bot
 COPY app /app
 WORKDIR /app
-RUN npm ci --only=production
+RUN npm install --only=production
 
 WORKDIR /
 
