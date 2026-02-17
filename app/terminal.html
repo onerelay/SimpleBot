@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>SSH Terminal</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.min.css" />
+    <style>
+        body { margin: 0; padding: 10px; background: #000; height: 100vh; }
+        #terminal { height: 100%; }
+    </style>
+</head>
+<body>
+    <div id="terminal"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.7.0/lib/xterm-addon-fit.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+    <script>
+        const term = new Terminal({ cursorBlink: true, theme: { background: '#000' } });
+        const fitAddon = new FitAddon.FitAddon();
+        term.loadAddon(fitAddon);
+        term.open(document.getElementById('terminal'));
+        fitAddon.fit();
+
+        const socket = io({
+            path: '/ssh-socket',
+            transports: ['websocket']
+        });
+
+        socket.on('connect', () => {
+            term.write('\r\n*** Connected to SSH server ***\r\n');
+        });
+
+        socket.on('data', (data) => {
+            term.write(data);
+        });
+
+        socket.on('disconnect', () => {
+            term.write('\r\n*** Disconnected ***\r\n');
+        });
+
+        term.onData((data) => {
+            socket.emit('data', data);
+        });
+
+        window.addEventListener('resize', () => {
+            fitAddon.fit();
+        });
+    </script>
+</body>
+</html>
