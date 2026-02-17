@@ -10,9 +10,6 @@
   "dependencies": {
     "discord.js": "^14.14.1",
     "express": "^4.18.2",
-    "undici": "^6.21.3",
-    "https-proxy-agent": "^7.0.5",
-    "node-fetch": "^2.7.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
