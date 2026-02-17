@@ -10,7 +10,7 @@
   "dependencies": {
     "discord.js": "^14.14.1",
     "express": "^4.18.2",
-    "socks-proxy-agent": "^8.0.2",
+    "socks": "^2.8.3",
     "undici": "^6.21.3",
     "https-proxy-agent": "^7.0.5"
   },
