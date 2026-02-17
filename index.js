@@ -11,14 +11,19 @@ client.once('ready', () => {
 
 // 3. THEN login (using the client that now exists)
 console.log("Attempting Discord login...");
+const loginTimeout = setTimeout(() => {
+    console.error("❌ Login timed out after 10 seconds");
+    process.exit(1);
+}, 10000);
+
 client.login(process.env.TOKEN)
   .then(() => {
+    clearTimeout(loginTimeout); // Cancel the timeout if login succeeds
     console.log("✅ Login successful!");
   })
   .catch(err => {
-    // This will print the actual error reason
+    clearTimeout(loginTimeout);
     console.error("❌ Login failed:", err.message);
-    // Optional: exit the process so Render restarts it
     process.exit(1);
   });
 
