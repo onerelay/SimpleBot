@@ -2,6 +2,7 @@ const { Client, GatewayIntentBits } = require('discord.js');
 const express = require('express');
 const { ProxyAgent, setGlobalDispatcher } = require('undici');
 const { HttpsProxyAgent } = require('https-proxy-agent');
+const fetch = require('node-fetch'); // For proxy test (use node-fetch@2)
 
 (async () => {
   try {
@@ -21,11 +22,29 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
       const wsAgent = new HttpsProxyAgent(PROXY_URL);
       global.wsProxyAgent = wsAgent;
       console.log('✅ WebSocket proxy agent configured');
+
+      // ==================== PROXY TEST ====================
+      try {
+        console.log('🧪 Testing proxy connection via ipify...');
+        // Use node-fetch with the proxy agent (since undici's fetch is now proxied)
+        const response = await fetch('https://api.ipify.org?format=json', {
+          agent: wsAgent // Use the same agent as WebSocket
+        });
+        const data = await response.json();
+        console.log('✅ Proxy test successful! Public IP via proxy:', data.ip);
+      } catch (testErr) {
+        console.error('❌ Proxy test failed:', testErr.message);
+        console.error('This means your proxy is not working. Please check:');
+        console.error('  - Proxy URL format (should be http://user:pass@ip:port)');
+        console.error('  - Proxy server is online and accessible from Render');
+        console.error('  - Proxy supports HTTPS CONNECT (port 443 tunneling)');
+        process.exit(1); // Stop if proxy is not working
+      }
     } else {
       console.log('⚠️ No PROXY_URL set, using direct connection');
     }
 
-    // ==================== START EXPRESS SERVER (REQUIRED BY RENDER) ====================
+    // ==================== START EXPRESS SERVER ====================
     const app = express();
     const PORT = process.env.PORT || 10000;
     app.get('/', (req, res) => res.send('Bot is running'));
