@@ -2,7 +2,7 @@ const { Client, GatewayIntentBits } = require('discord.js');
 const express = require('express');
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 4040;
 
 // Health check endpoint (used by cron-job.org to keep service alive)
 app.get('/health', (req, res) => res.send('OK'));
