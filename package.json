@@ -9,7 +9,9 @@
   },
   "dependencies": {
     "discord.js": "^14.14.1",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "undici": "^6.19.2",
+    "https-proxy-agent": "^7.0.5"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
