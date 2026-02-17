@@ -21,8 +21,8 @@ WORKDIR /app
 COPY app/package*.json ./
 RUN npm install
 
-# Copy bot source
-COPY app/index.js ./
+# Now copy the rest of the app (index.js, ssh-server.js, terminal.html, etc.)
+COPY app/ ./
 
 # Copy startup script
 COPY start_services.sh /start_services.sh
