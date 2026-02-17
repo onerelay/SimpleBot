@@ -2,6 +2,7 @@ const { Client, GatewayIntentBits } = require('discord.js');
 const express = require('express');
 const { createServer } = require('http');
 const { SocksClient } = require('socks');
+const dns = require('node:dns/promises');
 const { ProxyAgent, setGlobalDispatcher } = require('undici');
 const { HttpsProxyAgent } = require('https-proxy-agent');
 
@@ -43,13 +44,17 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
         console.log(`🔌 CONNECT request to ${hostname}:${port}`);
 
         try {
-          // Establish SOCKS5 connection using SocksClient
+          // Resolve hostname to IP (mimics curl's behavior)
+          const { address } = await dns.lookup(hostname, { family: 4 }); // Prefer IPv4
+          console.log(`   Resolved to IP: ${address}`);
+
+          // Establish SOCKS5 connection using the resolved IP
           const { socket } = await SocksClient.createConnection({
             ...proxyOptions,
-            destination: { host: hostname, port: port },
+            destination: { host: address, port: port },
           });
 
-          console.log(`✅ SOCKS connection established to ${hostname}:${port}`);
+          console.log(`✅ SOCKS connection established to ${hostname}:${port} via ${address}`);
 
           // Send 200 Connection Established
           clientSocket.write('HTTP/1.1 200 Connection Established\r\n\r\n');
