@@ -40,10 +40,6 @@ if (PROXY_URL) {
 } else {
   console.log('⚠️ No PROXY_URL set, using direct connection');
 }
-
-// ==================== DIAGNOSTIC: ENVIRONMENT VARIABLES ====================
-console.log('📋 Available environment keys:', Object.keys(process.env).sort());
-
 // ==================== TEST GENERAL INTERNET CONNECTIVITY ====================
 (async () => {
   try {
