@@ -1,23 +1,13 @@
 {
-  "name": "simplebot",
+  "name": "discord-bot",
   "version": "1.0.0",
-  "description": "A simple Discord bot with Express server",
+  "description": "Discord bot running on Render with Docker",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node index.js"
   },
   "dependencies": {
     "discord.js": "^14.14.1",
     "express": "^4.18.2"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
-  },
-  "engines": {
-    "node": "20.x"
-  },
-  "keywords": ["discord", "bot", "express"],
-  "author": "fragmetal",
-  "license": "MIT"
+  }
 }
