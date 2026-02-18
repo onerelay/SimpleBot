@@ -1,10 +1,10 @@
 {
-  "name": "discord-bot",
+  "name": "Docker-Server",
   "version": "1.0.0",
-  "description": "Discord bot running on Render with Docker",
-  "main": "index.js",
+  "description": "running on Render with Docker",
+  "main": "bot/index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node ."
   },
   "dependencies": {
     "discord.js": "^14.14.1",
