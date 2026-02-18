@@ -1,12 +1,14 @@
 FROM alpine:latest
-
+RUN echo "Docker-srv" > /etc/hostname
 # Install system dependencies (no nginx, no ngrok)
 RUN apk add --no-cache \
     bash \
+    git \
     curl \
     openssh \
     nodejs \
-    npm
+    npm \
+    screen
 
 # Configure SSH (optional, but keep for now)
 RUN ssh-keygen -A && \
