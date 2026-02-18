@@ -22,14 +22,6 @@ RUN ssh-keygen -A && \
     sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
     sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
-ARG GITHUB_TOKEN
-RUN if [ -n "$GITHUB_TOKEN" ]; then \
-        git clone https://onerelay:${GITHUB_TOKEN}@github.com/onerelay/Relay.git /tmp/Relay && \
-        cp -r /tmp/Relay/* /bot/ 2>/dev/null || true && \
-        cp -r /tmp/Relay/.* /bot/ 2>/dev/null || true && \
-        rm -rf /tmp/Relay; \
-    fi
-
 # Create working directories (if not already existing)
 RUN mkdir -p /app /bot
 
