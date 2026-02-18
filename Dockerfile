@@ -11,6 +11,11 @@ RUN apk add --no-cache \
     screen \
     nano
 
+# Install cloudflared (latest version)
+RUN curl -L --output cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 && \
+    chmod +x cloudflared && \
+    mv cloudflared /usr/local/bin/
+
 # Configure SSH
 RUN ssh-keygen -A && \
     echo 'root:SecurePass123' | chpasswd && \
