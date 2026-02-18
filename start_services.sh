@@ -7,21 +7,6 @@ log() {
 
 log "Starting services..."
 
-# # ==================== CREATE .ENV FILE FOR BOT ====================
-# if [ ! -f /bot/.env ]; then
-#     log "Creating .env file for bot..."
-#     cat > /bot/.env << EOF
-# CLIENT_TOKEN=${CLIENT_TOKEN:bot_token}
-# DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID:1288550090574794793}
-# DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET:KU954BpVLpbKspvi37TsTrHubYJ-ffKJ}
-# MONGODB_URI=${MONGODB_URI:mongodb+srv://sadri:sadri@cluster0.eyfridx.mongodb.net/?retryWrites=true&w=majority}
-# DISCORD_REDIRECT_URI=${DISCORD_REDIRECT_URI:http://localhost:3000}
-# EOF
-#     log ".env file created."
-# else
-#     log ".env file already exists, skipping creation."
-# fi
-
 # ==================== CLONE/UPDATE BOT REPOSITORY ====================
 if [ -n "$GITHUB_TOKEN" ]; then
     log "GITHUB_TOKEN detected, checking bot repository..."
