@@ -8,7 +8,6 @@ function setupSSHWebSocket(server) {
     });
 
     io.on('connection', (socket) => {
-        console.log('SSH client connected');
 
         const sshClient = new Client();
 
