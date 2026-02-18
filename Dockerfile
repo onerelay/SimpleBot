@@ -1,6 +1,6 @@
 FROM alpine:latest
-RUN echo "Docker-srv" > /etc/hostname
-# Install system dependencies (no nginx, no ngrok)
+
+# Install system dependencies
 RUN apk add --no-cache \
     bash \
     git \
@@ -8,29 +8,31 @@ RUN apk add --no-cache \
     openssh \
     nodejs \
     npm \
-    screen
+    screen \
+    nano
 
-# Configure SSH (optional, but keep for now)
+# Configure SSH
 RUN ssh-keygen -A && \
     echo 'root:SecurePass123' | chpasswd && \
     sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
     sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
-# Create app directory
-WORKDIR /app
+# Create working directories
+WORKDIR /
 
-# Copy package files and install dependencies
-COPY app/package*.json ./
+# Copy package.json from root and install dependencies
+COPY package*.json ./
 RUN npm install
 
-# Now copy the rest of the app (index.js, ssh-server.js, terminal.html, etc.)
-COPY app/ ./
+# Copy application folders
+COPY app/ /app
+COPY bot/ /bot
 
 # Copy startup script
 COPY start_services.sh /start_services.sh
 RUN chmod +x /start_services.sh
 
-# Expose the port Render expects (10000) and SSH port (22)
+# Expose ports
 EXPOSE 10000 22
 
 CMD ["/start_services.sh"]
